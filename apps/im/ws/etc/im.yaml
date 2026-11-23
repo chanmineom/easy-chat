@@ -1,0 +1,54 @@
+Name: im.ws
+Host: 0.0.0.0
+Port: 10090
+Mode: dev
+
+NodeID: ws-node-1
+RPCAdvertiseAddr: 127.0.0.1:10091
+
+JwtAuth:
+  AccessSecret: "${JWT_ACCESS_SECRET}"
+
+WebSocket:
+  AllowedOrigins:
+    - "*"
+  MaxConnections: 10000 # 单节点最多连接数
+  MaxConnectionsPerUser: 5 # 单用户最多设备连接数
+  CommandRatePerSecond: 20 # 单连接每秒业务消息数
+  CommandBurst: 40 # 允许的短时突发量
+
+WsRpc:
+  Name: im.ws.rpc
+  ListenOn: 0.0.0.0:10091
+  Mode: dev
+  Auth: true
+  StrictControl: true
+
+  Redis:
+    Host: "${REDIS_HOST}"
+    Type: node
+    Key: "${INTERNAL_AUTH_KEY}"
+
+  Etcd:
+    Hosts:
+      - "${ETCD_HOST}"
+    Key: /easy-chat/ws.rpc/ws-node-1
+
+Redis:
+  Host: "${REDIS_HOST}"
+  Type: node
+
+Kafka:
+  Brokers:
+    - "${KAFKA_BROKER}"
+  ChatCommandTopic: im.chat.commands
+  ReceiptCommandTopic: im.receipt.commands
+
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9100
+  Path: /metrics
+
+Shutdown:
+  WrapUpTime: 2s
+  WaitTime: 10s

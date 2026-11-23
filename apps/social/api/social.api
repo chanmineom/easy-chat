@@ -1,0 +1,200 @@
+syntax = "v1"
+
+type (
+	SendFriendRequestReq {
+		RecipientId string `json:"recipient_id"`
+		Message     string `json:"message"`
+	}
+	SendFriendRequestResp {
+		RequestId int64 `json:"request_id"`
+	}
+	FriendRequestItem {
+		Id          int64  `json:"id"`
+		RequesterId string `json:"requester_id"`
+		RecipientId string `json:"recipient_id"`
+		Message     string `json:"message"`
+		Status      int32  `json:"status"`
+		CreatedAt   int64  `json:"created_at"`
+	}
+	ListFriendRequestsReq  {}
+	ListFriendRequestsResp {
+		List []*FriendRequestItem `json:"list"`
+	}
+	HandleFriendRequestReq {
+		RequestId int64 `json:"request_id"`
+		Accept    bool  `json:"accept"`
+	}
+	HandleFriendRequestResp {
+		FriendshipId int64 `json:"friendship_id,omitempty"`
+	}
+	FriendListReq  {}
+	FriendListResp {
+		FriendIds []string `json:"friend_ids"`
+	}
+	RemoveFriendReq {
+		FriendId string `path:"friendId"`
+	}
+	RemoveFriendResp  {}
+)
+
+@server (
+	prefix: v1/social
+	group:  friend
+	jwt:    JwtAuth
+)
+service social-api {
+	@doc "send friend request"
+	@handler sendFriendRequest
+	post /friend/requests (SendFriendRequestReq) returns (SendFriendRequestResp)
+
+	@doc "list incoming friend requests"
+	@handler listFriendRequests
+	get /friend/requests/incoming (ListFriendRequestsReq) returns (ListFriendRequestsResp)
+
+	@doc "accept or reject friend request"
+	@handler handleFriendRequest
+	put /friend/requests (HandleFriendRequestReq) returns (HandleFriendRequestResp)
+
+	@doc "list friends"
+	@handler friendList
+	get /friends (FriendListReq) returns (FriendListResp)
+
+	@doc "remove friend"
+	@handler removeFriend
+	delete /friends/:friendId (RemoveFriendReq) returns (RemoveFriendResp)
+}
+
+type (
+	GroupSummary {
+		GroupId      string `json:"group_id"`
+		Name         string `json:"name"`
+		AvatarUrl    string `json:"avatar_url"`
+		Notification string `json:"notification"`
+		OwnerId      string `json:"owner_id"`
+		Role         int32  `json:"role"`
+		Status       int32  `json:"status"`
+		CreatedAt    int64  `json:"created_at"`
+		UpdatedAt    int64  `json:"updated_at"`
+	}
+	CreateGroupReq {
+		Name         string   `json:"name"`
+		AvatarUrl    string   `json:"avatar_url,optional"`
+		Notification string   `json:"notification,optional"`
+		MemberIds    []string `json:"member_ids,optional"`
+	}
+	CreateGroupResp {
+		GroupId string `json:"group_id"`
+	}
+	GroupListReq  {}
+	GroupListResp {
+		List []*GroupSummary `json:"list"`
+	}
+	GroupDetailReq {
+		GroupId string `path:"groupId"`
+	}
+	GroupDetailResp {
+		Group GroupSummary `json:"group"`
+	}
+	GroupMemberItem {
+		UserId   string `json:"user_id"`
+		Role     int32  `json:"role"`
+		Status   int32  `json:"status"`
+		JoinedAt int64  `json:"joined_at"`
+	}
+	GroupMemberListReq {
+		GroupId string `path:"groupId"`
+	}
+	GroupMemberListResp {
+		List []*GroupMemberItem `json:"list"`
+	}
+	AddGroupMembersReq {
+		GroupId   string   `path:"groupId"`
+		MemberIds []string `json:"member_ids"`
+	}
+	AddGroupMembersResp {
+		MembershipVersion int64    `json:"membership_version"`
+		AddedUserIds      []string `json:"added_user_ids"`
+	}
+	KickGroupMemberReq {
+		GroupId string `path:"groupId"`
+		UserId  string `path:"userId"`
+	}
+	KickGroupMemberResp {
+		MembershipVersion int64 `json:"membership_version"`
+	}
+	LeaveGroupReq {
+		GroupId string `path:"groupId"`
+	}
+	LeaveGroupResp {
+		MembershipVersion int64 `json:"membership_version"`
+	}
+	ChangeGroupMemberRoleReq {
+		GroupId string `path:"groupId"`
+		UserId  string `path:"userId"`
+		Role    int32  `json:"role"`
+	}
+	ChangeGroupMemberRoleResp {
+		MembershipVersion int64 `json:"membership_version"`
+	}
+	TransferGroupOwnershipReq {
+		GroupId    string `path:"groupId"`
+		NewOwnerId string `json:"new_owner_id"`
+	}
+	TransferGroupOwnershipResp {
+		MembershipVersion int64 `json:"membership_version"`
+	}
+	DissolveGroupReq {
+		GroupId string `path:"groupId"`
+	}
+	DissolveGroupResp {
+		MembershipVersion int64 `json:"membership_version"`
+	}
+)
+
+@server (
+	prefix: v1/social
+	group:  group
+	jwt:    JwtAuth
+)
+service social-api {
+	@doc "create group"
+	@handler createGroup
+	post /groups (CreateGroupReq) returns (CreateGroupResp)
+
+	@doc "list my groups"
+	@handler groupList
+	get /groups (GroupListReq) returns (GroupListResp)
+
+	@doc "get group"
+	@handler groupDetail
+	get /groups/:groupId (GroupDetailReq) returns (GroupDetailResp)
+
+	@doc "lsit group members"
+	@handler groupMemberList
+	get /groups/:groupId/members (GroupMemberListReq) returns (GroupMemberListResp)
+
+	@doc "add group members"
+	@handler addGroupMembers
+	post /groups/:groupId/members (AddGroupMembersReq) returns (AddGroupMembersResp)
+
+	@doc "kick group member"
+	@handler kickGroupMember
+	delete /groups/:groupId/members/:userId (KickGroupMemberReq) returns (KickGroupMemberResp)
+
+	@doc "leave group"
+	@handler leaveGroup
+	post /groups/:groupId/leave (LeaveGroupReq) returns (LeaveGroupResp)
+
+	@doc "change member role"
+	@handler changeGroupMemberRole
+	put /groups/:groupId/members/:userId/role (ChangeGroupMemberRoleReq) returns (ChangeGroupMemberRoleResp)
+
+	@doc "transfer group ownership"
+	@handler transferGroupOwnership
+	put /groups/:groupId/owner (TransferGroupOwnershipReq) returns (TransferGroupOwnershipResp)
+
+	@doc "dissolve group"
+	@handler dissolveGroup
+	delete /groups/:groupId (DissolveGroupReq) returns (DissolveGroupResp)
+}
+

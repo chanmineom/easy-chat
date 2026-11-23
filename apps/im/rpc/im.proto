@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package im;
+
+option go_package = "./im";
+
+message Request {
+  string ping = 1;
+}
+
+message Response {
+  string pong = 1;
+}
+
+message SetUpUserConversationReq {
+  string send_id = 1;
+  string recv_id = 2;
+  int32 chat_type = 3;
+}
+
+message SetUpUserConversationResp {
+  string conversation_id = 1;
+  int32 chat_type = 2;
+}
+
+message ChatMessage {
+  string message_id = 1;
+  string conversation_id = 2;
+  int64 sequence = 3;
+  string sender_id = 4;
+  string client_message_id = 5;
+  string content_type = 6;
+  string content = 7;
+  int64 created_at = 8;
+}
+
+message GetMessagesReq {
+  string user_id = 1;
+  string conversation_id = 2;
+  int64 after_seq = 3;
+  int32 limit = 4;
+  int64 before_req = 5;
+}
+
+message GetMessagesResp {
+  repeated ChatMessage messages = 1;
+  bool has_more = 2;
+}
+
+message ConversationSummary {
+  string conversation_id = 1;
+  int32 chat_type = 2;
+  int64 last_seq = 3;
+  int64 read_seq = 4;
+  int64 delivered_seq = 5;
+  int64 unread_count = 6;
+  int64 last_activity_at = 7;
+  ChatMessage last_message = 8;
+}
+
+message ListConversationsReq {
+  string user_id = 1;
+  int32 limit = 2;
+  int64 before_activity_at = 3;
+  string before_conversation_id = 4;
+}
+
+message ListConversationsResp {
+  repeated ConversationSummary conversations = 1;
+  bool has_more = 2;
+}
+
+message CreateGroupConversationReq {
+  string group_id = 1;
+  string creator_id = 2;
+  repeated string member_ids = 3;
+  int64 membership_version = 4;
+}
+
+message CreateGroupConversationResp {
+  string conversation_id = 1;
+  int32 chat_type = 2;
+}
+
+message SyncGroupMembershipReq {
+  string group_id = 1;
+  int64 version = 2;
+  string action = 3;
+  string actor_id = 4;
+  repeated string member_ids = 5;
+  int32 group_role = 6;
+}
+
+message SyncGroupMembershipResp {
+  string group_id = 1;
+  int64 version = 2;
+  string action = 3;
+  string actor_id = 4;
+  repeated string member_ids = 5;
+}
+
+service Im {
+  rpc Ping(Request) returns (Response);
+  rpc SetUpUserConversation(SetUpUserConversationReq) returns (SetUpUserConversationResp);
+  rpc GetMessages(GetMessagesReq) returns (GetMessagesResp);
+  rpc ListConversations(ListConversationsReq) returns (ListConversationsResp);
+  rpc CreateGroupConversation(CreateGroupConversationReq) returns (CreateGroupConversationResp);
+  rpc SyncGroupMembership(SyncGroupMembershipReq) returns (SyncGroupMembershipResp);
+}

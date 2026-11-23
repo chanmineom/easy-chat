@@ -1,0 +1,23 @@
+Name: user.api
+Host: 0.0.0.0
+Port: 8888
+Mode: dev
+
+UserRpc:
+  Endpoints:
+    - "${USER_RPC_ADDR}"
+  Timeout: 5000
+  App: user.api
+  Token: "${USER_API_RPC_TOKEN}"
+
+JwtAuth:
+  AccessSecret: "${JWT_ACCESS_SECRET}"
+
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9201
+  Path: /metrics
+
+Shutdown:
+  WrapUpTime: 2s
+  WaitTime: 10s

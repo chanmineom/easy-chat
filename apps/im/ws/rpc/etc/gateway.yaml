@@ -1,0 +1,15 @@
+Name: im.ws.rpc
+ListenOn: 0.0.0.0:10091
+
+Auth: true
+StrictControl: true
+
+Redis:
+  Host: "${REDIS_HOST}"
+  Type: node
+  Key: "${INTERNAL_AUTH_KEY}"
+
+Etcd:
+  Hosts:
+    - "${ETCD_HOST}"
+  Key: "${WS_ETCD_KEY_PREFIX}gateway"

@@ -1,0 +1,71 @@
+syntax = "v1"
+
+type (
+	RegisterReq {
+		Phone     string `json:"phone"`
+		Password  string `json:"password"`
+		Nickname  string `json:"nickname"`
+		AvatarUrl string `json:"avatar_url,optional"`
+	}
+	RegisterResp {
+		Token  string `json:"token"`
+		Expire int64  `json:"expire"`
+		UserId string `json:"user_id"`
+	}
+	LoginReq {
+		Phone    string `json:"phone"`
+		Password string `json:"password"`
+	}
+	LoginResp {
+		Token  string `json:"token"`
+		Expire int64  `json:"expire"`
+		UserId string `json:"user_id"`
+	}
+	UserInfoReq  {}
+	UserInfo {
+		Id        string `json:"id"`
+		Phone     string `json:"phone"`
+		Nickname  string `json:"nickname"`
+		AvatarUrl string `json:"avatar_url"`
+		Status    int32  `json:"status"`
+	}
+	UserInfoResp {
+		Info UserInfo `json:"info"`
+	}
+	BatchUserInfoReq {
+		UserIds string `form:"user_ids"`
+	}
+	BatchUserInfoResp {
+		List []UserInfo `json:"list"`
+	}
+)
+
+@server (
+	prefix: v1/user
+	group:  user
+)
+service user-api {
+	@doc "register"
+	@handler register
+	post /register (RegisterReq) returns (RegisterResp)
+
+	@doc "login"
+	@handler login
+	post /login (LoginReq) returns (LoginResp)
+}
+
+@server (
+	prefix: v1/user
+	group:  user
+	jwt:    JwtAuth
+)
+service user-api {
+	@doc "get current user"
+	@handler detail
+	get /detail (UserInfoReq) returns (UserInfoResp)
+
+	@doc "batch get user info"
+	@handler batchUserInfo
+	get /batch (BatchUserInfoReq) returns (BatchUserInfoResp)
+}
+

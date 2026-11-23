@@ -1,0 +1,203 @@
+syntax = "proto3";
+
+package social;
+
+option go_package = "./social";
+
+message CreateGroupReq {
+  string creator_id = 1;
+  string name = 2;
+  string avatar_url = 3;
+  string notification = 4;
+  repeated string member_ids = 5;
+}
+
+message CreateGroupResp {
+  string group_id = 1;
+}
+
+message LeaveGroupReq {
+  string group_id = 1;
+  string user_id = 2;
+}
+
+message LeaveGroupResp {
+  int64 membership_version = 1;
+}
+
+message AddGroupMembersReq {
+  string group_id = 1;
+  string operator_id = 2;
+  repeated string member_ids = 3;
+}
+
+message AddGroupMembersResp {
+  int64 membership_version = 1;
+  repeated string added_user_ids = 2;
+}
+
+message KickGroupMemberReq {
+  string group_id = 1;
+  string operator_id = 2;
+  string user_id = 3;
+}
+
+message KickGroupMemberResp {
+  int64 membership_version = 1;
+}
+
+message ChangeGroupMemberRoleReq {
+  string group_id = 1;
+  string operator_id = 2;
+  string user_id = 3;
+  int32 role = 4;
+}
+
+message ChangeGroupMemberRoleResp {
+  int64 membership_version = 1;
+}
+
+message TransferGroupOwnershipReq {
+  string group_id = 1;
+  string operator_id = 2;
+  string new_owner_id = 3;
+}
+
+message TransferGroupOwnershipResp {
+  int64 membership_version = 1;
+}
+
+message DissolveGroupReq {
+  string group_id = 1;
+  string operator_id = 2;
+}
+
+message DissolveGroupResp {
+  int64 membership_version = 1;
+}
+
+message SendFriendRequestReq {
+  string requester_id = 1;
+  string recipient_id = 2;
+  string message = 3;
+}
+
+message SendFriendRequestResp {
+  int64 request_id = 1;
+}
+
+message HandleFriendRequestReq {
+  int64 request_id = 1;
+  string handler_id = 2;
+  bool accept = 3;
+}
+
+message HandleFriendRequestResp {
+  int64 friendship_id = 1;
+}
+
+message ListFriendsReq {
+  string user_id = 1;
+}
+
+message ListFriendsResp {
+  repeated string friend_ids = 1;
+}
+
+message IsFriendReq {
+  string user_a = 1;
+  string user_b = 2;
+}
+
+message IsFriendResp {
+  bool is_friend = 1;
+}
+
+message RemoveFriendReq {
+  string user_id = 1;
+  string friend_id = 2;
+}
+
+message RemoveFriendResp {}
+
+message FriendRequestItem {
+  int64 id = 1;
+  string requester_id = 2;
+  string recipient_id = 3;
+  string message = 4;
+  int32 status = 5;
+  int64 created_at = 6;
+}
+
+message ListFriendRequestsReq {
+  string user_id = 1;
+}
+
+message ListFriendRequestsResp {
+  repeated FriendRequestItem requests = 1;
+}
+
+message GroupSummary {
+  string group_id = 1;
+  string name = 2;
+  string avatar_url = 3;
+  string notification = 4;
+  string owner_id = 5;
+  int32 role = 6;
+  int32 status = 7;
+  int64 created_at = 8;
+  int64 updated_at = 9;
+}
+
+message ListGroupsReq {
+  string user_id = 1;
+}
+
+message ListGroupResp {
+  repeated GroupSummary groups = 1;
+}
+
+message GetGroupReq {
+  string user_id = 1;
+  string group_id = 2;
+}
+
+message GetGroupResp {
+  GroupSummary group = 1;
+}
+
+message GroupMemberItem {
+  string user_id = 1;
+  int32 role = 2;
+  int32 status = 3;
+  int64 joined_at = 4;
+}
+
+message ListGroupMembersReq {
+  string user_id = 1;
+  string group_id = 2;
+}
+
+message ListGroupMembersResp {
+  repeated GroupMemberItem members = 1;
+}
+
+service Social {
+  rpc CreateGroup(CreateGroupReq) returns (CreateGroupResp);
+  rpc LeaveGroup(LeaveGroupReq) returns (LeaveGroupResp);
+  rpc AddGroupMembers(AddGroupMembersReq) returns (AddGroupMembersResp);
+  rpc KickGroupMember(KickGroupMemberReq) returns (KickGroupMemberResp);
+  rpc ChangeGroupMemberRole(ChangeGroupMemberRoleReq) returns (ChangeGroupMemberRoleResp);
+  rpc TransferGroupOwnership(TransferGroupOwnershipReq) returns (TransferGroupOwnershipResp);
+  rpc DissolveGroup(DissolveGroupReq) returns (DissolveGroupResp);
+  rpc SendFriendRequest(SendFriendRequestReq) returns (SendFriendRequestResp);
+  rpc HandleFriendRequest(HandleFriendRequestReq) returns (HandleFriendRequestResp);
+  rpc ListFriends(ListFriendsReq) returns (ListFriendsResp);
+  rpc IsFriend(IsFriendReq) returns (IsFriendResp);
+  rpc RemoveFriend(RemoveFriendReq) returns (RemoveFriendResp);
+  rpc ListFriendRequests(ListFriendRequestsReq) returns (ListFriendRequestsResp);
+  rpc ListGroups(ListGroupsReq) returns (ListGroupResp);
+  rpc GetGroup(GetGroupReq) returns (GetGroupResp);
+  rpc ListGroupMembers(ListGroupMembersReq) returns (ListGroupMembersResp);
+}
+

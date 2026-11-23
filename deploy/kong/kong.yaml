@@ -1,0 +1,157 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: user-api-service
+    url: http://user-api:8888
+    connect_timeout: 5000
+    read_timeout: 60000
+    write_timeout: 60000
+    routes:
+      - name: user-login-route
+        paths:
+          - /v1/user/login
+        methods:
+          - POST
+          - OPTIONS
+        strip_path: false
+
+      - name: user-register-route
+        paths:
+          - /v1/user/register
+        methods:
+          - POST
+          - OPTIONS
+        strip_path: false
+
+      - name: user-api-route
+        paths:
+          - /v1/user 
+        strip_path: false
+
+  - name: social-api-service
+    url: http://social-api:8889
+    connect_timeout: 5000
+    read_timeout: 60000
+    write_timeout: 60000
+    routes:
+      - name: social-api-route
+        paths:
+          - /v1/social
+        strip_path: false
+
+  - name: im-api-service
+    url: http://im-api:8890
+    connect_timeout: 5000
+    read_timeout: 60000
+    write_timeout: 60000
+    routes:
+      - name: im-api-route
+        paths:
+          - /v1/im
+        strip_path: false
+        
+  - name: im-ws-service
+    url: http://im-ws:10090
+    connect_timeout: 5000
+    read_timeout: 3600000
+    write_timeout: 3600000
+    routes:
+      - name: im-ws-route
+        paths:
+          - /ws
+        strip_path: false
+
+plugins:
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - GET
+        - POST 
+        - PUT 
+        - PATCH
+        - DELETE 
+        - OPTIONS
+      headers:
+        - Accept
+        - Authorization
+        - Content-Type
+        - X-Request-Id
+      exposed_headers:
+        - X-Request-Id
+        - X-Kong-Request-Id
+      credentials: false
+      max_age: 3600
+      preflight_continue: false
+
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 2
+      require_content_length: false
+
+  - name: rate-limiting
+    route: user-login-route
+    config:
+      minute: 5
+      hour: 30
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+      limit_by: ip
+
+  - name: rate-limiting
+    route: user-register-route
+    config:
+      minute: 5
+      hour: 30
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+      limit_by: ip
+
+  - name: rate-limiting
+    route: user-api-route
+    config:
+      minute: 120
+      hour: 2000
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+      limit_by: ip
+
+  - name: rate-limiting
+    route: social-api-route
+    config:
+      minute: 240
+      hour: 5000
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+      limit_by: ip
+
+  - name: rate-limiting
+    route: im-api-route
+    config:
+      minute: 240
+      hour: 5000
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+      limit_by: ip
+
+  - name: rate-limiting
+    route: im-ws-route
+    config:
+      minute: 30
+      hour: 300
+      policy: local
+      fault_tolerant: true
+      hide_client_headers: false
+      limit_by: ip
+
+  
+
+  
+      

@@ -1,0 +1,41 @@
+Name: im.api
+Host: 0.0.0.0
+Port: 8890
+Mode: dev
+
+ImRpc:
+  Endpoints:
+    - "${IM_RPC_ADDR}"
+  Timeout: 5000
+  App: im.api
+  Token: "${IM_API_RPC_TOKEN}"
+
+SocialRpc:
+  Endpoints:
+    - "${SOCIAL_RPC_ADDR}"
+  Timeout: 5000
+  App: im.api
+  Token: "${IM_API_RPC_TOKEN}"
+
+UserRpc:
+  Endpoints:
+    - "${USER_RPC_ADDR}"
+  Timeout: 5000
+  App: im.api
+  Token: "${IM_API_RPC_TOKEN}"
+
+Redis:
+  Host: "${REDIS_HOST}"
+  Type: node
+
+JwtAuth:
+  AccessSecret: "${JWT_ACCESS_SECRET}"
+
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9200
+  Path: /metrics
+
+Shutdown:
+  WrapUpTime: 2s
+  WaitTime: 10s

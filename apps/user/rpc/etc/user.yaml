@@ -1,0 +1,27 @@
+Name: user.rpc
+ListenOn: 0.0.0.0:8083
+Mode: dev
+
+Auth: true
+StrictControl: true
+
+Redis:
+  Host: "${REDIS_HOST}"
+  Type: node
+  Key: "${INTERNAL_AUTH_KEY}"
+
+Mysql:
+  DataSource: "${MYSQL_DSN}"
+
+Jwt:
+  AccessSecret: "${JWT_ACCESS_SECRET}"
+  AccessExpire: 86400
+
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9303
+  Path: /metrics
+
+Shutdown:
+  WrapUpTime: 2s
+  WaitTime: 10s

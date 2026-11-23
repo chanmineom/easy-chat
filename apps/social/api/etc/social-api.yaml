@@ -1,0 +1,23 @@
+Name: social.api
+Host: 0.0.0.0
+Port: 8889
+Mode: dev
+
+SocialRpc:
+  Endpoints:
+    - "${SOCIAL_RPC_ADDR}"
+  Timeout: 5000
+  App: social.api
+  Token: "${SOCIAL_API_RPC_TOKEN}"
+
+JwtAuth:
+  AccessSecret: "${JWT_ACCESS_SECRET}"
+
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9203
+  Path: /metrics
+
+Shutdown:
+  WrapUpTime: 2s
+  WaitTime: 10s

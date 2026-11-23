@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package gateway;
+
+option go_package = "./gateway";
+
+message MessageData {
+  string message_id = 1;
+  string conversation_id = 2;
+  int64 sequence = 3;
+  string sender_id = 4;
+  string client_message_id = 5;
+  string content_type = 6;
+  string content = 7;
+  int64 created_at = 8;
+}
+
+message PushToUsersReq {
+  repeated string user_ids = 1;
+  MessageData message = 2;
+}
+
+message PushToUsersResp {
+  int32 online_users = 1;
+  int32 delivered_connections = 2;
+}
+
+message CommandResult {
+  string command_id = 1;
+  string conversation_id = 2;
+  string client_message_id = 3;
+  string code = 4;
+  string message = 5;
+}
+
+message PushCommandResultReq {
+  string user_id = 1;
+  CommandResult result = 2;
+}
+
+message PushCommandResultResp {}
+
+service Gateway {
+  rpc PushToUsers(PushToUsersReq) returns (PushToUsersResp);
+  rpc PushCommandResult(PushCommandResultReq) returns (PushCommandResultResp);
+}

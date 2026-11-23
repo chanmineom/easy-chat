@@ -1,0 +1,45 @@
+Name: task.mq
+
+Mongo:
+  Url: "${MONGO_URL}"
+  Db: "${MONGO_DB}"
+
+Redis:
+  Host: "${REDIS_HOST}"
+  Type: node
+
+Kafka:
+  Brokers:
+    - "${KAFKA_BROKER}"
+  ChatCommandTopic: im.chat.commands
+  MessageCreatedTopic: im.message.created
+  ReceiptCommandTopic: im.receipt.commands
+  ConsumerGroup: easy-chat-task
+
+SocialRpc:
+  Endpoints:
+    - "${SOCIAL_RPC_ADDR}"
+  Timeout: 3000
+  App: task.mq
+  Token: "${TASK_RPC_TOKEN}"
+
+WsDiscovery:
+  Hosts:
+    - "${ETCD_HOST}"
+  WsRpcKeyPrefix: "${WS_ETCD_KEY_PREFIX}"
+  App: task.mq
+  Token: "${TASK_RPC_TOKEN}"
+
+DeadLetter:
+  Topic: im.dead.letter
+
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9400
+  Path: /metrics
+
+Shutdown:
+  WrapUpTime: 2s
+  WaitTime: 10s
+
+

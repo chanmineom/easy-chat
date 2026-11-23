@@ -1,0 +1,8 @@
+.git
+.gitignore
+build
+bin
+*.log
+.DS_Store
+deploy/env/.env
+deploy/env/*.local

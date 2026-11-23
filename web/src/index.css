@@ -1,0 +1,36 @@
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #eef1f5;
+  font-family: 
+    Inter,
+    Roboto,
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #c5cad2 transparent;
+}
+
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #c5cad2;
+  border-radius: 8px;
+}

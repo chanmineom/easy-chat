@@ -1,0 +1,24 @@
+Name: im.rpc
+ListenOn: 0.0.0.0:8080
+Mode: dev
+
+Auth: true
+StrictControl: true
+
+Redis:
+  Host: "${REDIS_HOST}"
+  Type: node
+  Key: "${INTERNAL_AUTH_KEY}"
+
+Mongo:
+  Url: "${MONGO_URL}"
+  Db: "${MONGO_DB}"
+
+Prometheus:
+  Host: 0.0.0.0
+  Port: 9300
+  Path: /metrics
+
+Shutdown:
+  WrapUpTime: 2s
+  WaitTime: 10s

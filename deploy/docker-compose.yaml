@@ -1,0 +1,200 @@
+name: easy-chat
+
+x-app: &app
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 15s
+  env_file:
+    - env/.env
+  networks:
+    - easy-chat-network
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: "20m"
+      max-file: "5"
+
+services:
+  user-rpc:
+    <<: *app
+    image: easy-chat-user-rpc:dev
+    container_name: easy-chat-user-rpc
+    build:
+      context: ..
+      dockerfile: deploy/docker/user-rpc.Dockerfile
+    ports:
+      - "9303:9303"
+    volumes:
+      - ../apps/user/rpc/etc/user.yaml:/app/config.yaml:ro
+
+  social-rpc:
+    <<: *app
+    image: easy-chat-social-rpc:dev
+    container_name: easy-chat-social-rpc
+    build:
+      context: ..
+      dockerfile: deploy/docker/social-rpc.Dockerfile
+    environment:
+      IM_RPC_ADDR: im-rpc:8080
+    ports:
+      - "9301:9301"
+    volumes:
+      - ../apps/social/rpc/etc/social.yaml:/app/config.yaml:ro
+    depends_on:
+      - im-rpc
+
+  im-rpc:
+    <<: *app
+    image: easy-chat-im-rpc:dev
+    container_name: easy-chat-im-rpc
+    build:
+      context: ..
+      dockerfile: deploy/docker/im-rpc.Dockerfile
+    ports:
+      - "9300:9300"
+    volumes:
+      - ../apps/im/rpc/etc/im.yaml:/app/config.yaml:ro
+
+  user-api:
+    <<: *app
+    image: easy-chat-user-api:dev
+    container_name: easy-chat-user-api
+    build:
+      context: ..
+      dockerfile: deploy/docker/user-api.Dockerfile
+    environment:
+      USER_RPC_ADDR: user-rpc:8083
+    ports:
+      # - "8888:8888"
+      - "9201:9201"
+    volumes:
+      - ../apps/user/api/etc/user-api.yaml:/app/config.yaml:ro
+    depends_on:
+      - user-rpc
+
+  social-api:
+    <<: *app
+    image: easy-chat-social-api:dev
+    container_name: easy-chat-social-api
+    build:
+      context: ..
+      dockerfile: deploy/docker/social-api.Dockerfile
+    environment:
+      SOCIAL_RPC_ADDR: social-rpc:8081
+    ports:
+      # - "8889:8889"
+      - "9203:9203"
+    volumes:
+      - ../apps/social/api/etc/social-api.yaml:/app/config.yaml:ro
+    depends_on:
+      - social-rpc
+
+  im-api:
+    <<: *app
+    image: easy-chat-im-api:dev
+    container_name: easy-chat-im-api
+    build:
+      context: ..
+      dockerfile: deploy/docker/im-api.Dockerfile
+    environment:
+      IM_RPC_ADDR: im-rpc:8080
+      SOCIAL_RPC_ADDR: social-rpc:8081
+      USER_RPC_ADDR: user-rpc:8083
+    ports:
+      # - "8890:8890"
+      - "9200:9200"
+    volumes:
+      - ../apps/im/api/etc/im.yaml:/app/config.yaml:ro
+    depends_on:
+      - im-rpc
+      - social-rpc
+      - user-rpc
+
+  im-ws:
+    <<: *app
+    image: easy-chat-im-ws:dev
+    container_name: easy-chat-im-ws
+    hostname: im-ws
+    build:
+      context: ..
+      dockerfile: deploy/docker/im-ws.Dockerfile
+    ports:
+      # - "10090:10090"
+      - "9100:9100"
+    volumes:
+      - ../apps/im/ws/etc/im.yaml:/app/config.yaml:ro
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://127.0.0.1:10090/healthz" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  task.mq:
+    <<: *app
+    image: easy-chat-task-mq:dev
+    container_name: easy-chat-task-mq
+    build:
+      context: ..
+      dockerfile: deploy/docker/task-mq.Dockerfile
+    environment:
+      SOCIAL_RPC_ADDR: social-rpc:8081
+    ports:
+      - "9400:9400"
+    volumes:
+      - ../apps/task/mq/etc/task.yaml:/app/config.yaml:ro
+    depends_on:
+      - im-rpc
+      - social-rpc
+      - im-ws
+
+  kong:
+    image: kong:3.9.4
+    container_name: easy-chat-kong
+    restart: unless-stopped
+    init: true
+
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_LOG_LEVEL: info
+    
+    ports:
+      - "8000:8000"
+      - "127.0.0.1:8001:8001"
+
+    volumes:
+      - ./kong/kong.yaml:/kong/declarative/kong.yml:ro
+
+    networks:
+      - easy-chat-network
+
+    depends_on:
+      - user-api
+      - social-api
+      - im-api
+      - im-ws
+
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+networks:
+  easy-chat-network:
+    name: easy-chat-network
+    driver: bridge
